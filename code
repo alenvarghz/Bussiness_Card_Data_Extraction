@@ -1,0 +1,45 @@
+import pytesseract
+import streamlit as st
+from PIL import Image
+import pandas as pd
+import pymongo
+
+
+pytesseract.pytesseract.tesseract_cmd=r"C:/Program Files/Tesseract-OCR/tesseract.exe"
+
+im=Image.open(r"C:/Users/91790/Downloads/Business-Cards-extraction-2.png")
+st.set_page_config(page_title="BizCardX",page_icon=im,layout="wide")
+
+st.title("BizCardX")
+st.subheader("Extracting Business Card Data with OCR")
+col1,col2=st.columns(2)
+with col1:
+    st.image(Image.open(r"C:/Users/91790/Downloads/Business-Cards-extraction-2.png"))
+
+with col2:
+    image=st.file_uploader("upload image",type=["png","jpg","jpeg"])
+    buttons=st.button("submit")
+
+
+
+
+def load_ocr(ima):
+    extract = pytesseract.image_to_string(Image.open(ima))
+    return extract
+
+if buttons==True:
+    display= load_ocr(image)
+    st.write(display)
+    d=display.split(" ")
+    df = pd.DataFrame(d, columns=["data"])
+    st.write(df)
+
+
+
+    client = pymongo.MongoClient("mongodb+srv://alen:1234@cluster0.yrmsenw.mongodb.net/?retryWrites=true&w=majority")
+    db = client.ocr
+    x = db.OCR
+    dataa = df.to_dict('records')
+    x.insert_many(dataa)
+
+
